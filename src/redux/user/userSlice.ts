@@ -1,4 +1,6 @@
 import { createAction, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { LogList } from "src/components/Logs/Logs";
+import { AggregatedData } from "src/pages/components";
 
 export interface UserState {
   isLoggedIn: boolean;
@@ -29,6 +31,7 @@ export interface UserState {
   chatselectedUser: any;
   createProfile: boolean | null;
   unverifiedCreatorData: any;
+  aggregated_data: AggregatedData | null;
 }
 
 const initialState: UserState = {
@@ -60,6 +63,7 @@ const initialState: UserState = {
   chatselectedUser: {},
   createProfile: false,
   unverifiedCreatorData: {},
+  aggregated_data: null,
 };
 
 export const userSlice = createSlice({
@@ -145,6 +149,9 @@ export const userSlice = createSlice({
     setUnverifiedCreatorData: (state, action: PayloadAction<any>) => {
       state.unverifiedCreatorData = action.payload;
     },
+    setAggregatedData: (state, action: PayloadAction<any>) => {
+      state.aggregated_data = action.payload;
+    },
   },
 });
 
@@ -195,6 +202,9 @@ export const userActions = {
       country: string;
     };
   }>("user/createProfile"),
+  aggregatedData: createAction<{
+    accessToken: string;
+  }>("data/aggregated"),
   setUnverifiedCreatorData: createAction<any>("user/setUnverifiedCreatorData"),
 };
 

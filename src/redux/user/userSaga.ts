@@ -264,7 +264,7 @@ export function* createProfileHandler(
     const { accessToken, data, id } = action.payload;
     yield put(userActions.setDataLoading(true));
 
-    const url = `${API_URI}api/v1/creator/${id}`; 
+    const url = `${API_URI}api/v1/creator/${id}`;
     const headers = {
       "Content-Type": "text/plain",
       Authorization: `Bearer ${accessToken}`,
@@ -280,14 +280,14 @@ export function* createProfileHandler(
     const responseData = yield response.json();
 
     if (response.ok) {
-      yield put(userActions.setCreateProfile(true)); 
+      yield put(userActions.setCreateProfile(true));
       yield put(userActions.setDataLoading(false));
     } else {
-      yield put(userActions.setCreateProfile(false)); 
+      yield put(userActions.setCreateProfile(false));
       yield put(userActions.setDataLoading(false));
     }
   } catch (err) {
-    yield put(userActions.setCreateProfile(false)); 
+    yield put(userActions.setCreateProfile(false));
     yield put(userActions.setDataLoading(false));
   } finally {
     yield put(userActions.setDataLoading(false));
@@ -301,7 +301,7 @@ export function* getAggregatedDataForUnverifiedCreatorHandler(
     const { creatorId, accessToken } = action.payload;
     yield put(userActions.setDataLoading(true));
     const url = `${API_URI}api/v1/user/get_aggregated_data_unverified_creator/${creatorId}`;
-    
+
     const headers = {
       Authorization: `Bearer ${accessToken}`,
     };
@@ -316,12 +316,45 @@ export function* getAggregatedDataForUnverifiedCreatorHandler(
     if (response.ok) {
       const data = yield response.json();
       yield put(userActions.setDataLoading(false));
-      yield put(userActions.setUnverifiedCreatorData(data.result.creator_detail));
+      yield put(
+        userActions.setUnverifiedCreatorData(data.result.creator_detail)
+      );
     } else {
       yield put(userActions.setDataLoading(false));
     }
   } catch (err) {
     yield put(userActions.setDataLoading(false));
+  }
+}
+
+export function* getAggregated(
+  action: PayloadAction<{
+    accessToken: string;
+  }>
+): Generator<any, any, any> {
+  try {
+    const { accessToken } = action.payload;
+    const url = `${API_URI}api/v1/user/get_aggregated_data_collector/ACyBghHZcR`;
+    const headers = {
+      "Content-Type": "text/plain",
+      Authorization: `Bearer ${accessToken}`,
+    };
+    const options: RequestInit = {
+      method: "GET",
+      headers: headers,
+    };
+    const response = yield fetch(url, options);
+    const data = yield response.json();
+
+    if (response.ok) {
+      yield put(userActions.setAggregatedData(data.result));
+
+      // yield put(userActions.setDataLoading(false));
+    } else {
+      // yield put(userActions.setDataLoading(false));
+    }
+  } catch (err) {
+    // yield put(userActions.setDataLoading(false));
   }
 }
 
@@ -337,7 +370,11 @@ export default function* userWalletSaga() {
     takeEvery(userActions.getCollectors.type, getCollectorsHandler),
     takeEvery(userActions.fetchUsers.type, fetchUsersHandler),
     takeEvery(userActions.createProfile.type, createProfileHandler),
-    takeEvery(userActions.setUnverifiedCreatorData.type, getAggregatedDataForUnverifiedCreatorHandler),
+    takeEvery(
+      userActions.setUnverifiedCreatorData.type,
+      getAggregatedDataForUnverifiedCreatorHandler
+    ),
+    takeEvery(userActions.aggregatedData.type, getAggregated),
   ]);
   delay(1000);
 }

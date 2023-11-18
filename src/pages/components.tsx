@@ -1,5 +1,5 @@
-import React from "react";
-import Logs from "../components/Logs/Logs";
+import React, { useEffect } from "react";
+import Logs, { LogList } from "../components/Logs/Logs";
 import Missions from "../components/Missions/Missions";
 import TabHeader from "src/components/TabHeader/TabHeader";
 import Leaderboard from "src/components/Leaderboard/Leaderboard";
@@ -10,8 +10,30 @@ import MissionCard from "src/components/MissionCard/MissionCard";
 
 import { Meta } from "../layouts/Meta";
 import { Main } from "../templates/Main";
+import { useDispatch, useSelector } from "react-redux";
+import { userActions } from "src/redux/user/userSlice";
+import { useAuthContext } from "src/context/AuthProvider";
+import { AppState } from "src/redux/store";
+
+export interface AggregatedData {
+  collector_details: object;
+  incidents: object[];
+  logs: LogList;
+  missions: object[];
+  total_earning_chat: object[];
+}
 
 function Components() {
+  const dispatch = useDispatch();
+  const { accessToken } = useAuthContext();
+  const aggregated_data = useSelector((state: AppState) => {
+    return state ? state.user.aggregated_data : null;
+  });
+
+  useEffect(() => {
+    dispatch(userActions.aggregatedData({ accessToken }));
+  }, []);
+
   return (
     <Main meta={<Meta title="Recyclium" description="Recyclium front-end" />}>
       <div className="mt-10 flex w-full items-center justify-center">
@@ -21,10 +43,10 @@ function Components() {
       </div>
       <div className="flex h-fullScreen flex-col items-center gap-10 font-primary lg:flex-row lg:justify-center">
         <div className="w-[650px]">
-          <Logs type="collector" />
+          <Logs logData={aggregated_data?.logs} type="collector" />
         </div>
         <div className="w-[400px]">
-          <Missions type="collector" />
+          <Missions missionData={aggregated_data?.missions} type="collector" />
         </div>
       </div>
       <div className="mb-6 mt-6">
@@ -51,3 +73,6 @@ function Components() {
 }
 
 export default Components;
+function dispatch(arg0: { payload: { accessToken: string }; type: string }) {
+  throw new Error("Function not implemented.");
+}

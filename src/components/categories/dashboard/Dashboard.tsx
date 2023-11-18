@@ -6,7 +6,7 @@ import GlobalProgress from "../../../components/GlobalProgress/GlobalProgress";
 import ActiveLocation from "../../../components/ActiveLocation/ActiveLocation";
 import { useAppSelector } from "../../../redux/hooks";
 import LoadingSpinner from "src/components/LoadSpinner/LoadSpinner";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useAuthContext } from "src/context/AuthProvider";
 import { userActions } from "src/redux/user/userSlice";
 
@@ -26,7 +26,7 @@ const Dashboard = () => {
           page: 1,
           role: "creator",
           accessToken: accessToken,
-        }),
+        })
       );
     }
   }, [dispatch]);

@@ -2,16 +2,14 @@ import React from "react";
 import MissionLog from "./MissionLog";
 import { Tab } from "@headlessui/react";
 import CustomTab from "../CustomTab/CustomTab";
-import { myMissionData } from "../../utils/MissionData";
-import { type } from "os";
 
 const myHeaderData = ["Queued", "Ongoing", "Finished"];
 
 interface MissionData {
-  title: string;
-  company: string;
-  amount: number;
-  imageUrl: string;
+  title?: string;
+  company?: string;
+  amount?: number;
+  imageUrl?: string;
 }
 
 interface EarningsProps {
@@ -22,7 +20,7 @@ interface EarningsProps {
 }
 
 function Missions({
-  missionData = myMissionData,
+  missionData: MissionData,
   headerData = myHeaderData,
   missiontype = "collector",
 }: EarningsProps) {
@@ -31,7 +29,7 @@ function Missions({
       <div className="flex flex-row justify-between w-full text-darkgray">
         <div className="text-lg font-semibold font-primary">Missions</div>
         <div className="text-xs font-normal font-primary">
-          {missionData.length} Missions
+          {MissionData?.length} Missions
         </div>
       </div>
       <div className={`mt-4 h-[690px]`}>
@@ -46,9 +44,9 @@ function Missions({
                   headerData[0] != "" ? "h-[630px]" : "mt-[-30px] h-[680px]"
                 }`}
               >
-                {missionData && (
+                {MissionData && (
                   <>
-                    {missionData.map((item, index) => {
+                    {MissionData.map((item, index) => {
                       return (
                         <MissionLog
                           key={index}
