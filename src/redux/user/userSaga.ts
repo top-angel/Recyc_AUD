@@ -325,6 +325,37 @@ export function* getAggregatedDataForUnverifiedCreatorHandler(
   }
 }
 
+export function* getAggregatedDataCollectorDetailsHandler(
+  action: PayloadAction<{ id: string; accessToken: string }>
+): Generator<any, any, any> {
+  try {
+    const { id, accessToken } = action.payload;
+    yield put(userActions.setDataLoading(true));
+    const url = `${API_URI}api/v1/user/get_aggregated_data_collector/${id}`;
+    
+    const headers = {
+      Authorization: `Bearer ${accessToken}`,
+    };
+
+    const options: RequestInit = {
+      method: "GET",
+      headers,
+    };
+
+    const response = yield call(fetch, url, options);
+
+    if (response.ok) {
+      const data = yield response.json();
+      yield put(userActions.setDataLoading(false));
+      yield put(userActions.setAggregatedDetailsData(data.result));
+    } else {
+      yield put(userActions.setDataLoading(false));
+    }
+  } catch (err) {
+    yield put(userActions.setDataLoading(false));
+  }
+}
+
 export default function* userWalletSaga() {
   yield all([
     takeEvery(userActions.allMembers.type, userAllMembersHandler),
@@ -337,7 +368,8 @@ export default function* userWalletSaga() {
     takeEvery(userActions.getCollectors.type, getCollectorsHandler),
     takeEvery(userActions.fetchUsers.type, fetchUsersHandler),
     takeEvery(userActions.createProfile.type, createProfileHandler),
-    takeEvery(userActions.setUnverifiedCreatorData.type, getAggregatedDataForUnverifiedCreatorHandler),
+    takeEvery(userActions.unverifiedCreatorData.type, getAggregatedDataForUnverifiedCreatorHandler),
+    takeEvery(userActions.aggregatedDetailsData.type, getAggregatedDataCollectorDetailsHandler),
   ]);
   delay(1000);
 }

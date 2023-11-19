@@ -7,6 +7,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 
 interface DataPoint {
   month: string;
@@ -45,7 +46,21 @@ interface EarningsProps {
   data?: DataPoint[]; // Define the data prop
 }
 
+type EarningsDetailsProps = {
+  _id: string,
+  amount: number,
+  end_date: string,
+  public_address: string,
+  start_date: string,
+}
+
 const Earnings = ({ data = myData }: EarningsProps) => {
+
+  const { aggregatedDetailsData } = useAppSelector((s) => ({
+    aggregatedDetailsData: s.user.aggregatedDetailsData,
+  }));
+  const earingDetailsData: EarningsDetailsProps[] = aggregatedDetailsData?.total_earning_chat;
+
   const totalEarnings = data.reduce((sum, point) => sum + point.earnings, 0);
   const formatYAxisTick = (value: number) => `$${value}`;
   return (

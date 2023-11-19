@@ -2,8 +2,7 @@ import React from "react";
 import MissionLog from "./MissionLog";
 import { Tab } from "@headlessui/react";
 import CustomTab from "../CustomTab/CustomTab";
-import { myMissionData } from "../../utils/MissionData";
-import { type } from "os";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 
 const myHeaderData = ["Queued", "Ongoing", "Finished"];
 
@@ -21,17 +20,33 @@ interface EarningsProps {
   type: string;
 }
 
+type MissionDetailsProps = {
+  _id: string,
+  bounty_id: string,
+  company_name: string,
+  mission_name: string,
+  number_of_scans: number,
+  profile_image: any,
+  status: string,
+  title: string,
+}
+
 function Missions({
-  missionData = myMissionData,
   headerData = myHeaderData,
   missiontype = "collector",
 }: EarningsProps) {
+
+  const { aggregatedDetailsData } = useAppSelector((s) => ({
+    aggregatedDetailsData: s.user.aggregatedDetailsData,
+  }));
+  const missionsDetailsData: MissionDetailsProps[] = aggregatedDetailsData?.missions;
+
   return (
     <div className="flex flex-col w-full p-5 rounded-lg bg-gray">
       <div className="flex flex-row justify-between w-full text-darkgray">
         <div className="text-lg font-semibold font-primary">Missions</div>
         <div className="text-xs font-normal font-primary">
-          {missionData.length} Missions
+          {missionsDetailsData?.length} Missions
         </div>
       </div>
       <div className={`mt-4 h-[690px]`}>
@@ -46,17 +61,17 @@ function Missions({
                   headerData[0] != "" ? "h-[630px]" : "mt-[-30px] h-[680px]"
                 }`}
               >
-                {missionData && (
+                {missionsDetailsData && (
                   <>
-                    {missionData.map((item, index) => {
+                    {missionsDetailsData.map((item, index) => {
                       return (
                         <MissionLog
                           key={index}
                           type={missiontype}
-                          title={item.title}
-                          company={item.company}
-                          amount={item.amount}
-                          imageUrl={item.imageUrl}
+                          title={item.mission_name}
+                          company={item.company_name}
+                          amount={item.number_of_scans}
+                          imageUrl={item.profile_image}
                         />
                       );
                     })}

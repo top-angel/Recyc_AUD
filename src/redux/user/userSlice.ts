@@ -29,6 +29,7 @@ export interface UserState {
   chatselectedUser: any;
   createProfile: boolean | null;
   unverifiedCreatorData: any;
+  aggregatedDetailsData: any;
 }
 
 const initialState: UserState = {
@@ -60,6 +61,7 @@ const initialState: UserState = {
   chatselectedUser: {},
   createProfile: false,
   unverifiedCreatorData: {},
+  aggregatedDetailsData: {},
 };
 
 export const userSlice = createSlice({
@@ -94,6 +96,7 @@ export const userSlice = createSlice({
       state.chatselectedUser = {};
       state.createProfile = false;
       state.unverifiedCreatorData = {};
+      state.aggregatedDetailsData = {};
     },
     authenticate: (state, action) => {
       state.isLoggedIn = true;
@@ -145,6 +148,9 @@ export const userSlice = createSlice({
     setUnverifiedCreatorData: (state, action: PayloadAction<any>) => {
       state.unverifiedCreatorData = action.payload;
     },
+    setAggregatedDetailsData: (state, action: PayloadAction<any>) => {
+      state.aggregatedDetailsData = action.payload;
+    },
   },
 });
 
@@ -195,7 +201,14 @@ export const userActions = {
       country: string;
     };
   }>("user/createProfile"),
-  setUnverifiedCreatorData: createAction<any>("user/setUnverifiedCreatorData"),
+  unverifiedCreatorData: createAction<{
+    accessToken: string;
+    id: string;
+  }>("user/unverifiedCreatorData"),
+  aggregatedDetailsData: createAction<{
+    id: string;
+    accessToken: string;
+  }>("user/aggregatedDetailsData"),
 };
 
 export default userSlice.reducer;
