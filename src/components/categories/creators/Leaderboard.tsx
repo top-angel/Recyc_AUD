@@ -68,7 +68,7 @@ const Leaderboard = ({ members }: any) => {
   }
 
   const onClickRow = (props: any) => {
-    router.push(`/creator/DjDtPsdgkI`);
+    // router.push(`/creator/DjDtPsdgkI`);
   };
 
   return (

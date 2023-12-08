@@ -44,7 +44,7 @@ const MissionDecision = ({
           <div className="mx-auto w-full rounded-lg bg-gray p-6 shadow">
             <div className="flex justify-between">
               <div className="mb-4 text-left font-primary text-lg font-semibold text-darkgray">
-                Mission Creator Application Details
+                Creator Application Details
               </div>
               <div className="mb-4 font-primary text-xs font-normal text-darkgray">
                 {formattedDate}

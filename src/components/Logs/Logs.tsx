@@ -3,17 +3,43 @@ import ScanedLog from "./ScanedLog";
 import StoredLog from "./StoredLog";
 import ReturnedLog from "./ReturnedLog";
 import { Tab } from "@headlessui/react";
-import { logsData } from "../../utils/LogsData";
 import CustomTab from "../CustomTab/CustomTab";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 
 type LogsProps = {
   type: "collector" | "creator" | "storer";
   headerData?: string[];
 };
 
+type logsDetailsDataProps = {
+  _id: string,
+  _rev: string,
+  company_name: string,
+  created_at: string,
+  description: string,
+  entity_list_type: string,
+  entity_type: string,
+  favorites_of: [],
+  image: string,
+  log_name: string,
+  name: string,
+  number_of_scans: number,
+  profile_image: any,
+  public_address: string,
+  qr_code: string,
+  type: "Scanned" | "Stored" | "Returned",
+  updated_at: string,
+}
+
 const myHeaderData = ["Scanned (538)", "Stored(138)", "Returned(71)"];
 
 function Logs({ type, headerData = myHeaderData }: LogsProps) {
+  const { aggregatedDetailsData } = useAppSelector((s) => ({
+    aggregatedDetailsData: s.user.aggregatedDetailsData,
+  }));
+  const logsDetailsData: logsDetailsDataProps[] = aggregatedDetailsData?.logs?.scanned_list;
+  
+
   return (
     <div className="flex flex-col p-5 rounded-xl bg-gray">
       <div className="flex flex-row justify-between w-full text-darkgray">
@@ -26,58 +52,49 @@ function Logs({ type, headerData = myHeaderData }: LogsProps) {
       <div className="mt-4">
         <CustomTab headers={headerData}>
           <Tab.Panels>
-            {logsData?.map((item, index) => {
+            {logsDetailsData?.map((item: any, index) => {
               if (!(index == 0 && headerData.length == 2)) {
                 return (
                   <Tab.Panel key={index}>
                     <div className="block logTag">
                       <div className="flex flex-col overflow-auto h-panel">
-                        {item.scaned &&
-                          item.scaned.map((data, index) => {
-                            return (
-                              <ScanedLog
-                                key={index}
-                                type={type}
-                                title={data.title}
-                                scanCount={data.scanCount}
-                                company={data.company}
-                                date={data.date}
-                                imageUrl={data.imageUrl}
-                              />
-                            );
-                          })}
-                        {item.stored &&
-                          item.stored.map((data, index) => {
-                            return (
-                              <StoredLog
-                                key={index}
-                                type={type}
-                                title={data.title}
-                                storeCount={data.storeCount}
-                                company={data.company}
-                                date={data.date}
-                                imageUrl={data.imageUrl}
-                                userImage={data.userImage}
-                                userName={data.userName}
-                                userAddress={data.userAddress}
-                              />
-                            );
-                          })}
-                        {item.returned &&
-                          item.returned.map((data, index) => {
-                            return (
-                              <ReturnedLog
-                                key={index}
-                                type={type}
-                                title={data.title}
-                                returnedCount={data.returnedCount}
-                                company={data.company}
-                                date={data.date}
-                                imageUrl={data.imageUrl}
-                                price={data.price}
-                              />
-                            );
-                          })}
+                        {item.type == "Scanned" && (
+                          <ScanedLog
+                            key={index}
+                            type={item.type}
+                            title={item.log_name}
+                            scanCount={item.number_of_scans}
+                            company={item.company_name}
+                            date={item.created_at}
+                            imageUrl={item.image}
+                          />
+                          )}
+                        {item.type == "Stored" && (
+                           <StoredLog
+                            key={index}
+                            type={item.type}
+                            title={item.log_name}
+                            storeCount={item.number_of_scans}
+                            company={item.company_name}
+                            date={item.created_at}
+                            imageUrl={item.image}
+                            userImage={item.profile_image?.company_image}
+                            userName={item.name}
+                            userAddress={item.public_address}
+                          />
+                          )}
+                        {item.type == "Returned" && (
+                           <ReturnedLog
+                            key={index}
+                            type={item.type}
+                            title={item.log_name}
+                            returnedCount={item.number_of_scans}
+                            company={item.company_name}
+                            date={item.created_at}
+                            imageUrl={item.image}
+                            price={""}
+                          />
+                          )}
                       </div>
                     </div>
                   </Tab.Panel>

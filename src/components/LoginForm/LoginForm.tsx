@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import Image from "next/image";
 import Button from "../Button/Button";
-import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useAuthContext } from "../../context/AuthProvider";
+import { deleteCookie } from "src/utils/cookies";
 
 export interface Values {
   email: string;
@@ -15,11 +15,16 @@ type props = {
 };
 
 const LoginForm = ({ onClick }: props) => {
-  const { user, authenticated } = usePrivy();
-  const { accessToken, loading } = useAuthContext();
+  const { loading, roles } = useAuthContext();
+
+  useEffect(() => {
+    deleteCookie("roles");
+  }, []);
+
+  console.log(roles);
 
   return (
-    <div className="rounded-2xl border-2 border-gray bg-white p-10">
+    <div className="p-10 bg-white border-2 rounded-2xl border-gray">
       <div className="flex justify-center">
         <Image
           src={"/assets/images/textlogo.svg"}
@@ -32,7 +37,7 @@ const LoginForm = ({ onClick }: props) => {
         <Button
           type="button"
           onClick={onClick}
-          className="mt-10 rounded-xl bg-primary font-primary text-white inline-flex items-center justify-center"
+          className="inline-flex items-center justify-center mt-10 text-white rounded-xl bg-primary font-primary"
         >
           Login
         </Button>
@@ -41,10 +46,17 @@ const LoginForm = ({ onClick }: props) => {
         <Button
           type="button"
           onClick={onClick}
-          className="mt-10 rounded-xl bg-primary font-primary text-white inline-flex items-center justify-center"
+          className="inline-flex items-center justify-center mt-10 text-white rounded-xl bg-primary font-primary"
         >
           {loadingSpinner} Loading...
         </Button>
+      )}
+      {roles !== "" && roles === "admin" && (
+        <div className="text-sm text-rose-500">
+          You are not a Recyclium Admin.
+          {/* <br /> Please contact us to change that from the email
+          <br /> you used to log in - recyclium@dataunion.app */}
+        </div>
       )}
     </div>
   );

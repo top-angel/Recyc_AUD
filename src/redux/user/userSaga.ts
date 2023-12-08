@@ -1,4 +1,11 @@
-import { call, put, delay, all, takeEvery } from "redux-saga/effects";
+import {
+  call,
+  put,
+  delay,
+  all,
+  takeEvery,
+  takeLatest,
+} from "redux-saga/effects";
 import { userActions } from "./userSlice";
 import { PayloadAction } from "@reduxjs/toolkit";
 import { useFetch } from "../../hooks/useFetch";
@@ -264,7 +271,7 @@ export function* createProfileHandler(
     const { accessToken, data, id } = action.payload;
     yield put(userActions.setDataLoading(true));
 
-    const url = `${API_URI}api/v1/creator/${id}`; 
+    const url = `${API_URI}api/v1/creator/${id}`;
     const headers = {
       "Content-Type": "text/plain",
       Authorization: `Bearer ${accessToken}`,
@@ -280,14 +287,14 @@ export function* createProfileHandler(
     const responseData = yield response.json();
 
     if (response.ok) {
-      yield put(userActions.setCreateProfile(true)); 
+      yield put(userActions.setCreateProfile(true));
       yield put(userActions.setDataLoading(false));
     } else {
-      yield put(userActions.setCreateProfile(false)); 
+      yield put(userActions.setCreateProfile(false));
       yield put(userActions.setDataLoading(false));
     }
   } catch (err) {
-    yield put(userActions.setCreateProfile(false)); 
+    yield put(userActions.setCreateProfile(false));
     yield put(userActions.setDataLoading(false));
   } finally {
     yield put(userActions.setDataLoading(false));
@@ -301,7 +308,7 @@ export function* getAggregatedDataForUnverifiedCreatorHandler(
     const { creatorId, accessToken } = action.payload;
     yield put(userActions.setDataLoading(true));
     const url = `${API_URI}api/v1/user/get_aggregated_data_unverified_creator/${creatorId}`;
-    
+
     const headers = {
       Authorization: `Bearer ${accessToken}`,
     };
@@ -316,11 +323,173 @@ export function* getAggregatedDataForUnverifiedCreatorHandler(
     if (response.ok) {
       const data = yield response.json();
       yield put(userActions.setDataLoading(false));
-      yield put(userActions.setUnverifiedCreatorData(data.result.creator_detail));
+      yield put(
+        userActions.setUnverifiedCreatorData(data.result.creator_detail)
+      );
     } else {
       yield put(userActions.setDataLoading(false));
     }
   } catch (err) {
+    yield put(userActions.setDataLoading(false));
+  }
+}
+
+export function* getAggregatedDataCollectorDetailsHandler(
+  action: PayloadAction<{ id: string; accessToken: string }>
+): Generator<any, any, any> {
+  try {
+    const { id, accessToken } = action.payload;
+    yield put(userActions.setDataLoading(true));
+    const url = `${API_URI}api/v1/user/get_aggregated_data_collector/${id}`;
+
+    const headers = {
+      Authorization: `Bearer ${accessToken}`,
+    };
+
+    const options: RequestInit = {
+      method: "GET",
+      headers,
+    };
+
+    const response = yield call(fetch, url, options);
+
+    if (response.ok) {
+      const data = yield response.json();
+      yield put(userActions.setDataLoading(false));
+      yield put(userActions.setAggregatedDetailsData(data.result));
+    } else {
+      yield put(userActions.setDataLoading(false));
+    }
+  } catch (err) {
+    yield put(userActions.setDataLoading(false));
+  }
+}
+
+export function* getAllNewStorersHandler(
+  action: PayloadAction<{
+    token: string;
+    pageSize: number;
+  }>
+): Generator<any, any, any> {
+  console.warn("getAllNewStorers", action);
+  const { token, pageSize } = action.payload;
+  const endpoint = `${API_URI}api/v1/user/get-all-new-storers?page_size=${pageSize}&page=1`;
+  try {
+    yield put(userActions.setNewStorers(["loading"]));
+
+    const response = yield call(useFetch, endpoint, "GET", token);
+    const { storers } = yield response;
+    console.log(storers);
+    yield put(userActions.setNewStorers(storers));
+  } catch (err) {
+    console.log(err);
+    yield put(userActions.setNewStorers([]));
+  }
+}
+
+export function* getAllNewCreatorsHandler(
+  action: PayloadAction<{
+    token: string;
+    pageSize: number;
+  }>
+): Generator<any, any, any> {
+  console.warn("getAllNewCreators", action);
+  const { token, pageSize } = action.payload;
+  const endpoint = `${API_URI}api/v1/user/get-all-new-creators?page_size=${pageSize}&page=1`;
+  try {
+    yield put(userActions.setNewCreators(["loading"]));
+
+    const response = yield call(useFetch, endpoint, "GET", token);
+    const { creators } = yield response;
+    console.log(creators);
+    yield put(userActions.setNewCreators(creators));
+  } catch (err) {
+    console.log(err);
+    yield put(userActions.setNewCreators([]));
+  }
+}
+
+export function* approveStorerInfoHandler(
+  action: PayloadAction<{
+    id: string;
+    token: string;
+    storerData: {
+      name: string;
+      address: string;
+      geocode: {
+        lat: number;
+        lng: number;
+      };
+      postalCode: string;
+      city: string;
+      country: string;
+      worktime: string;
+      storageSpace: number;
+    };
+  }>
+): Generator<any, any, any> {
+  const { id, token, storerData } = action.payload;
+  const endpoint = `${API_URI}api/v1/storer/${id}`;
+  try {
+    yield put(userActions.setDataLoading(true));
+    const requestOptions = {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(storerData),
+    };
+
+    const response = yield fetch(endpoint, requestOptions);
+
+    if (response.ok) {
+      yield put(userActions.setApproveStorer(true));
+      yield put(userActions.setDataLoading(false));
+    } else {
+      console.log('Failed to approve storer information');
+      yield put(userActions.setDataLoading(false));
+    }
+  } catch (err) {
+    console.log(err);
+    yield put(userActions.setDataLoading(false));
+  }
+}
+
+export function* updateProfileStatusHandler(
+  action: PayloadAction<{
+    id: string;
+    token: string;
+    profileStatusData: {
+      status: string;
+      status_reason: string;
+    };
+  }>
+): Generator<any, any, any> {
+  const { id, token, profileStatusData } = action.payload;
+  const endpoint = `${API_URI}api/v1/user/${id}/profile`;
+  try {
+    yield put(userActions.setDataLoading(true));
+    const requestOptions = {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(profileStatusData),
+    };
+
+    const response = yield fetch(endpoint, requestOptions);
+
+    if (response.ok) {
+      yield put(userActions.setProfileStatus(true));
+      yield put(userActions.setDataLoading(false));
+    } else {
+      console.log('Failed to update profile status');
+      yield put(userActions.setDataLoading(false));
+    }
+  } catch (err) {
+    console.log(err);
     yield put(userActions.setDataLoading(false));
   }
 }
@@ -337,7 +506,18 @@ export default function* userWalletSaga() {
     takeEvery(userActions.getCollectors.type, getCollectorsHandler),
     takeEvery(userActions.fetchUsers.type, fetchUsersHandler),
     takeEvery(userActions.createProfile.type, createProfileHandler),
-    takeEvery(userActions.setUnverifiedCreatorData.type, getAggregatedDataForUnverifiedCreatorHandler),
+    takeEvery(
+      userActions.unverifiedCreatorData.type,
+      getAggregatedDataForUnverifiedCreatorHandler
+    ),
+    takeEvery(
+      userActions.aggregatedDetailsData.type,
+      getAggregatedDataCollectorDetailsHandler
+    ),
+    takeLatest(userActions.getAllNewStorers.type, getAllNewStorersHandler),
+    takeLatest(userActions.getAllNewCreators.type, getAllNewCreatorsHandler),
+    takeLatest(userActions.approveStorerInfo.type, approveStorerInfoHandler),
+    takeLatest(userActions.updateProfileStatus.type, updateProfileStatusHandler),
   ]);
   delay(1000);
 }

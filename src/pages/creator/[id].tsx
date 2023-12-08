@@ -18,30 +18,41 @@ const CreatorsDetailsPage = () => {
 
   const { accessToken } = useAuthContext();
 
-  const { isDataLoading, creatorDetail } = useAppSelector((s) => ({
+  const { isDataLoading, newCreators } = useAppSelector((s) => ({
     isDataLoading: s.user.isDataLoading,
-    creatorDetail: s.user.creatorDetail,
+    newCreators: s.user.newCreators,
   }));
 
-  useEffect(() => {
-    if (id) {
-      dispatch(
-        userActions.creatorDetail({
-          url: `https://crab.recyclium.dataunion.app/api/v1/creator/${id}`,
-          token: accessToken,
-        }),
-      );
-    }
-  }, [id]);
+  function findObjectById(array, id) {
+    return array.find(item => item._id === id);
+  }
+
+  let targetId = id; 
+  let resultObject = findObjectById(newCreators, targetId);
+
+
+  // useEffect(() => {
+  //   if (id) {
+  //     dispatch(
+  //       userActions.creatorDetail({
+  //         url: `https://crab.recyclium.dataunion.app/api/v1/creator/${id}`,
+  //         token: accessToken,
+  //       })
+  //     );
+  //   }
+  // }, [id]);
 
   return (
     <Main meta={<Meta title="Recyclium" description="Recyclium front-end" />}>
       {/* <Creators verifiedStatus={true} /> */}
-      {isDataLoading ? (
+      {/* {isDataLoading ? (
         <LoadingSpinner />
-      ) : (
+      ) : creatorDetail ? (
         <Creators verifiedStatus={false} data={creatorDetail} />
-      )}
+      ) : (
+        <></>
+      )} */}
+      {resultObject && <Creators verifiedStatus={false} data={resultObject} />}
     </Main>
   );
 };

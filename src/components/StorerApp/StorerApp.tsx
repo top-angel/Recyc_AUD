@@ -5,7 +5,7 @@ import StorerApproved from "./StorerApproved";
 
 import { Values } from "./StorerQuery";
 
-function StorerApp() {
+function StorerApp({storerData}: any) {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const submit = (values: Values) => {};
@@ -25,7 +25,7 @@ function StorerApp() {
   return (
     <div className="flex flex-col items-center justify-center w-full mb-3 p-7 bg-gray rounded-xl font-primary text-darkgray">
       <div className="hidden w-full tabLink">
-        <StorerQuery submit={submit} setSelectedIndex={setSelectedIndex} />
+        <StorerQuery submit={submit} setSelectedIndex={setSelectedIndex} storerQueryData={storerData}/>
       </div>
 
       <div className="hidden w-full tabLink">

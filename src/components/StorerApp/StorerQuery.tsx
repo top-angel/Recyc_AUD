@@ -3,6 +3,10 @@ import React, { useEffect, useState } from "react";
 import * as Yup from "yup";
 import TextField from "../TextField/TextField";
 import router from "next/router";
+import { useAuthContext } from "src/context/AuthProvider";
+import { useAppDispatch, useAppSelector } from "src/redux/hooks";
+import LoadingSpinner from "../LoadSpinner/LoadSpinner";
+import { userActions } from "src/redux/user/userSlice";
 
 export interface Values {
   name: string;
@@ -10,42 +14,73 @@ export interface Values {
 }
 
 const dataSchema = Yup.object().shape({
-  name: Yup.string().min(2, "Too Short!").required("Required"),
-  address: Yup.string().min(2, "Too Short!").required("Required"),
+  // name: Yup.string().min(2, "Too Short!").required("Required"),
+  // address: Yup.string().min(2, "Too Short!").required("Required"),
 });
 
 type props = {
   submit: (values: Values) => void;
   setSelectedIndex: (index: number) => void;
+  storerQueryData: any;
 };
 
-function StorerQuery({ submit, setSelectedIndex }: props) {
-  const [inputValue, setInputValue] = useState("");
+function StorerQuery({ submit, setSelectedIndex, storerQueryData }: props) {
 
-  const [username, setUserName] = useState("");
-  const [address, setAddress] = useState("");
+  // let newAddress = [storerQueryData?.profile?.address, storerQueryData?.profile?.city, storerQueryData?.profile?.country, storerQueryData?.profile?.postalCode]
+  // .filter(value => value) 
+  // .join(' '); 
 
-  useEffect(() => {
-    const button = document.getElementById(
-      "approve"
-    ) as HTMLButtonElement | null;
-    if (username.length < 2 || address.length < 2) {
-      if (button != null) button.disabled = true;
-      button?.classList.replace("bg-primary", "bg-darkgray");
-    } else {
-      if (button != null) button.disabled = false;
-      button?.classList.replace("bg-darkgray", "bg-primary");
-    }
-  }, [username, address]);
+  const [username, setUserName] = useState(storerQueryData?.profile?.name || "");
+  const [address, setAddress] = useState(storerQueryData?.profile?.address || "");
+  const [worktime, setWorkTime] = useState(storerQueryData?.profile?.worktime || "");
+  const [storageSpace, setStorageSpace] = useState(storerQueryData?.profile?.storageSpace || "");
+
+  const handleWorkTimeChange = (event) => {
+    setWorkTime(event.target.value);
+  };
 
   const handleSelect = (index: number) => {
     setSelectedIndex(index);
   };
 
-  const handleApprove = () => {
-    if (username.length >= 3 && address.length >= 3)
-      router.push(`/storer/approved/Mo's Garage`);
+  const dispatch = useAppDispatch();
+
+  const { isDataLoading, approveStorer } = useAppSelector((s) => ({
+    isDataLoading: s.user.isDataLoading,
+    approveStorer: s.user.approveStorer,
+  }));
+
+  const { accessToken } = useAuthContext();
+
+  const handleApprove = async () => {
+    try {
+      const storerData = {
+        name: storerQueryData?.profile?.name,
+        address: storerQueryData?.profile?.address,
+        geocode: {
+          "lat": storerQueryData?.profile?.geocode?.lat,
+          "lng": storerQueryData?.profile?.geocode?.lng
+        },
+        postalCode: storerQueryData?.profile?.postalCode,
+        city: storerQueryData?.profile?.city,
+        country: storerQueryData?.profile?.country,
+        worktime: storerQueryData?.profile?.worktime,
+        storageSpace: storerQueryData?.profile?.storageSpace
+      };
+  
+      let mainId: any = storerQueryData._id;
+      dispatch(userActions.setApproveStorer(false));
+      await dispatch(userActions.approveStorerInfo({ id: mainId.toString(), token: accessToken, storerData: storerData }));
+  
+      router.push(`/storer/approved/${mainId}`);
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
+
+  if (isDataLoading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <div className="w-full">
@@ -76,6 +111,7 @@ function StorerQuery({ submit, setSelectedIndex }: props) {
                 type="name"
                 label=""
                 setValue={setUserName}
+                value={username}
                 className="w-full px-3 py-2 mb-3 text-sm rounded-md bg-lightwhite text-darkgray outline outline-1 outline-darkgray focus:outline focus:outline-1 focus:outline-offset-0 focus:outline-primary"
                 placeholder="Robin Lehman"
               />
@@ -88,6 +124,7 @@ function StorerQuery({ submit, setSelectedIndex }: props) {
                 type="address"
                 label=""
                 setValue={setAddress}
+                value={address}
                 className="w-full px-3 py-2 mb-3 text-sm rounded-md bg-lightwhite text-darkgray outline outline-1 outline-darkgray focus:outline focus:outline-1 focus:outline-offset-0 focus:outline-primary"
                 placeholder="Annie M.G. Schmidtplein 14, 8083NZ, Rotterdam"
               />
@@ -98,6 +135,8 @@ function StorerQuery({ submit, setSelectedIndex }: props) {
                 Opening Hours & Description
               </div>
               <textarea
+                value={worktime}
+                onChange={handleWorkTimeChange}
                 placeholder={`10.00 - 17.00 Weekdays \n Closed on Weekends \n\n Please bring your items through the front door :)`}
                 rows={9}
                 className="w-full px-3 py-2 mt-3 text-sm rounded-md bg-lightwhite text-darkgray outline outline-1 outline-darkgray focus:outline focus:outline-1 focus:outline-offset-0 focus:outline-primary"
@@ -105,11 +144,15 @@ function StorerQuery({ submit, setSelectedIndex }: props) {
             </div>
             <div className="w-full mt-5">
               <div className="w-full text-sm text-left">Storage Space</div>
-              <input
+               <TextField
+                name="storageSpace"
                 type="text"
+                label=""
+                setValue={setStorageSpace}
+                value={storageSpace}
+                className="w-full px-3 py-2 mb-3 text-sm rounded-md bg-lightwhite text-darkgray outline outline-1 outline-darkgray focus:outline focus:outline-1 focus:outline-offset-0 focus:outline-primary"
                 placeholder="700m3"
-                className="w-full px-3 py-2 mt-3 text-sm rounded-md bg-lightwhite text-darkgray outline outline-1 outline-darkgray focus:outline focus:outline-1 focus:outline-offset-0 focus:outline-primary"
-              ></input>
+              />
             </div>
             <div className="flex flex-row justify-between w-full mt-5">
               <button

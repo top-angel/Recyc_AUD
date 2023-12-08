@@ -28,11 +28,13 @@ import { usePrivy, useWallets } from "@privy-io/react-auth";
 import error from "next/error";
 
 export type Tokens = {
+  roles: any;
   accessToken: string;
   refreshToken: string;
 };
 
 interface AuthContextValue {
+  roles: string;
   accessToken: string;
   changingAccessToken: boolean;
   refreshToken: string;
@@ -48,6 +50,7 @@ interface AuthContextValue {
 }
 
 const defaultState: AuthContextValue = {
+  roles: "",
   accessToken: "",
   changingAccessToken: false,
   refreshToken: "",
@@ -94,7 +97,7 @@ function AuthContextProvider({
 }: {
   children: ReactNode;
 }): ReactElement {
-  const { user, signMessage, authenticated } = usePrivy();
+  const { user, signMessage, authenticated, logout } = usePrivy();
   const { wallets } = useWallets();
   const embeddedWallet = wallets.find(
     (wallet) => wallet.walletClientType === "privy"
@@ -122,6 +125,9 @@ function AuthContextProvider({
   const [refreshToken, setRefreshToken] = useState<string>(
     getCookieValue("jwtRefresh") || ""
   );
+
+  const [roles, setRoles] = useState<string>(getCookieValue("roles") || "");
+
   const [acceptedUpload, setAcceptedUpload] = useState<boolean>(
     cookieStorage?.acceptedUpload || false
   );
@@ -143,6 +149,7 @@ function AuthContextProvider({
 
   useEffect(() => {
     if (!accessToken) {
+      setRoles("");
     } else if (accessToken && changingAccessToken) {
       setChangingAccessToken(false);
     }
@@ -177,34 +184,47 @@ function AuthContextProvider({
           try {
             const signed = await signMessage(nonce);
             try {
-              const { accessToken, refreshToken } = await GetTokens(
+              const { accessToken, refreshToken, roles } = await GetTokens(
                 accountId,
                 signed
               );
+              setCookie(`roles`, roles[0]);
+              setRoles("admin");
+              if (roles[0] === "Recyclium_Admin" || roles[0] === "admin") {
+                setCookie(`accountId`, accountId);
+                setCookie(`jwtAccess`, accessToken);
+                setCookie(`jwtRefresh`, accessToken);
 
-              console.log(accessToken)
-              setCookie(`accountId`, accountId);
-              setCookie(`jwtAccess`, accessToken);
-              setCookie(`jwtRefresh`, accessToken);
-
-              changeAccessToken(accessToken);
-              changeRefreshToken(refreshToken);
-              router.push("/");
+                changeAccessToken(accessToken);
+                changeRefreshToken(refreshToken);
+                router.push("/");
+              } else {
+                // deleteCookie("roles");
+                logout();
+              }
               setLoading(false);
             } catch (error) {
               console.log(`Registering...`);
               try {
-                const { accessToken, refreshToken } = await RegisterTokens(
-                  accountId
-                );
-                setCookie(`accountId`, accountId);
-                setCookie(`jwtAccess`, accessToken);
-                setCookie(`jwtRefresh`, accessToken);
-                changeAccessToken(accessToken);
-                changeRefreshToken(refreshToken);
+                const { accessToken, refreshToken, roles } =
+                  await RegisterTokens(accountId);
+                setCookie(`roles`, roles[0]);
+                setRoles("admin");
+                if (roles[0] === "Recyclium_Admin" || roles[0] === "admin") {
+                  setCookie(`accountId`, accountId);
+                  setCookie(`jwtAccess`, accessToken);
+                  setCookie(`jwtRefresh`, accessToken);
+
+                  changeAccessToken(accessToken);
+                  changeRefreshToken(refreshToken);
+                } else {
+                  // deleteCookie("roles");
+                  logout();
+                }
                 setLoading(false);
               } catch (error) {
                 setLoading(false);
+                logout();
                 console.log(
                   `[AuthProvider.ts] RegisterTokens ERROR = ${error}. Contact support.`
                 );
@@ -212,21 +232,31 @@ function AuthContextProvider({
             }
           } catch (error) {
             setLoading(false);
+            logout();
             console.log("singed error===>", error);
           }
         } else {
           console.log(`Registering...`);
           try {
-            const { accessToken, refreshToken } = await RegisterTokens(
+            const { accessToken, refreshToken, roles } = await RegisterTokens(
               accountId
             );
-            setCookie(`accountId`, accountId);
-            setCookie(`jwtAccess`, accessToken);
-            setCookie(`jwtRefresh`, accessToken);
-            changeAccessToken(accessToken);
-            changeRefreshToken(refreshToken);
+            setCookie(`roles`, roles[0]);
+            setRoles("admin");
+            if (roles[0] === "Recyclium_Admin" || roles[0] === "admin") {
+              setCookie(`accountId`, accountId);
+              setCookie(`jwtAccess`, accessToken);
+              setCookie(`jwtRefresh`, accessToken);
+
+              changeAccessToken(accessToken);
+              changeRefreshToken(refreshToken);
+            } else {
+              deleteCookie("roles");
+              logout();
+            }
           } catch (error) {
             setLoading(false);
+            logout();
             console.log(
               `[AuthProvider.ts] RegisterTokens ERROR = ${error}. Contact support.`
             );
@@ -234,6 +264,7 @@ function AuthContextProvider({
         }
       } catch (error) {
         setLoading(false);
+        logout();
         console.log("nonce error===>", error);
       }
     }
@@ -340,6 +371,7 @@ function AuthContextProvider({
   return (
     <AuthContext.Provider
       value={{
+        roles,
         accessToken,
         changingAccessToken,
         refreshToken,

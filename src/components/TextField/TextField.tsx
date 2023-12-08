@@ -1,5 +1,5 @@
 import { FieldHookConfig, useField } from "formik";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 type InputProps = {
   label: string;
@@ -17,7 +17,12 @@ type InputProps = {
 const TextField = ({ label, setValue, ...props }: InputProps) => {
   const [field, meta, helpers] = useField(props);
 
-  const [val, setVal] = useState("");
+  const [val, setVal] = useState(props.value || ""); 
+
+  useEffect(() => {    
+    setVal(props.value || "");
+  }, [props.value]);
+  
   const handleChange = (e: any) => {
     field.onChange(e);
     setVal(e.target.value);

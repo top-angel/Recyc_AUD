@@ -1,12 +1,23 @@
-import React from "react";
+import { useRouter } from "next/router";
+import React, { useEffect } from "react";
 
 const MissionDeclined = () => {
+  const router = useRouter();
+
+  useEffect(() => {
+    const navigateToCreator = () => {
+      router.push(`/creators`);
+    };
+    const timeoutId = setTimeout(navigateToCreator, 1200);
+    return () => clearTimeout(timeoutId);
+  }, [router]);
+
   return (
     <div>
       <div className="mx-auto flex w-full flex-col rounded-lg bg-gray p-6 shadow">
         <div className="flex justify-between">
           <div className="mb-6 text-left font-primary text-lg font-semibold text-darkgray">
-            Mission Creator Application Details
+            Creator Application Details
           </div>
           <div className="mb-6 text-left font-primary text-xs font-normal text-darkgray">
             Re-Evaluate

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Card from "../../Card/Card";
 import missionIcon from "public/assets/images/coca-cola.svg";
 import storeIcon from "public/assets/images/heinken.svg";
+import { date } from "yup";
 
 const data = [
   {
@@ -21,10 +22,7 @@ const data = [
 ];
 
 interface IVerificationItem {
-  name: string;
-  action: string;
-  date: string;
-  location: string;
+  profile: any;
 }
 
 const RecentVerified = ({ members }: any) => {
@@ -38,30 +36,30 @@ const RecentVerified = ({ members }: any) => {
       </div>
       <div className="flex flex-col mt-4 space-y-6">
         {members.map((item: IVerificationItem, index: number) => {
-          const { action, name, date, location } = item;
+          const { profile } = item;
           return (
             <div
               className="flex items-start w-full gap-3 p-3 bg-white rounded-lg"
               key={index}
             >
-              <Image
+              {/* <Image
                 src={action === "mission" ? missionIcon : storeIcon}
                 alt="icon"
                 width={32}
                 height={32}
-              />
+              /> */}
               <div className="w-full">
                 <div className="flex items-center w-full gap-1">
                   <span className="text-lg font-semibold font-primary text-darkgray">
-                    {name}
+                    {profile.company_title}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <div className="text-sm font-light font-primary text-darkgray">
-                    {date}
+                    {/* {date} */}
                   </div>
                   <div className="text-sm font-light font-primary text-darkgray">
-                    {location}
+                    {/* {location} */}
                   </div>
                 </div>
               </div>

@@ -43,14 +43,12 @@ const Creators = () => {
           {creators?.top_creators?.length}
         </div>
       </div>
-      <div className="grid grid-cols-4 gap-5 mt-5">
-        <VerificationQueue
-          members={creators?.verification_queue_creators?.result}
-        />
+      <div className="grid grid-cols-3 gap-5 mt-5">
+        <VerificationQueue />
         <div className="col-span-2 ">
           <Leaderboard members={creators?.top_creators} />
         </div>
-        <RecentVerified members={creators?.verified_creators.result} />
+        {/* <RecentVerified members={creators?.verified_creators.result} /> */}
       </div>
     </div>
   );

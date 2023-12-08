@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import "react-datepicker/dist/react-datepicker.css";
@@ -11,30 +11,33 @@ import { useAuthContext } from "src/context/AuthProvider";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 
 import LoadingSpinner from "src/components/LoadSpinner/LoadSpinner";
+import TextField from "../TextField/TextField";
 
 interface MissionUnverifiedDetailsProps {
   onDeclineClick: () => void;
   onApproveClick: () => void;
+  missionData: any;
 }
 
 interface FormValues {
   companyTitle: string;
-  email: string;
-  address: string;
-  country: string;
+  companyEmail: string;
+  companyAddress: string;
+  companyCountry: string;
   missionImage: string;
 }
 
 const validationSchema = Yup.object().shape({
   companyTitle: Yup.string().required("Company Title Required"),
-  email: Yup.string().email("Invalid email").required("Email Required"),
-  address: Yup.string().required("Address Required"),
-  country: Yup.string().required("Country Required"),
+  companyEmail: Yup.string().email("Invalid email").required("Email Required"),
+  companyAddress: Yup.string().required("Address Required"),
+  companyCountry: Yup.string().required("Country Required"),
 });
 
 const MissionUnverifiedDetails = ({
   onDeclineClick,
   onApproveClick,
+  missionData,
 }: MissionUnverifiedDetailsProps) => {
   const currentDate = new Date();
   const day = currentDate.getDate().toString().padStart(2, "0"); // Ensure double-digit day
@@ -61,32 +64,35 @@ const MissionUnverifiedDetails = ({
 
   const { isDataLoading, createProfile } = useAppSelector((s) => ({
     isDataLoading: s.user.isDataLoading,
-
     createProfile: s.user.createProfile,
   }));
 
-  const handleCreateProfile = ({values}: any) => {
-    const id = "DjDtPsdgkI"; 
-    const data = {
-      email: values.email,
-      company_title: values.companyTitle,
-      address: values.address,
-      country: values.country,
-    };
+  const [companyTitle, setCompanyTitle] = useState(missionData?.profile?.company_title || "");
+  const [companyEmail, setCompanyEmail] = useState(missionData?.profile?.email || "");
+  const [companyAddress, setCompanyAddress] = useState(missionData?.profile?.address || "");
+  const [companyCountry, setCompanyCountry] = useState(missionData?.profile?.country || "");
 
-    dispatch(userActions.createProfile({ accessToken, id, data }));
+  const handleCreateProfile = async () => {
+    try {
+      const id = missionData?._id;
+      const data = {
+        email: companyEmail,
+        company_title: companyTitle,
+        address: companyAddress,
+        country: companyCountry,
+      };
+      await dispatch(userActions.createProfile({ accessToken, id, data }));
+  
+      onApproveClick();
+     
+    } catch (error) {
+      console.error("Error approve creating profile:", error);
+    }
   };
 
   if (isDataLoading) {
     return <LoadingSpinner />;
   }
-
-  useEffect(() => {
-    console.log(createProfile)
-    if (createProfile == true) {
-      onApproveClick();
-    }
-  }, [createProfile])
 
 
   return (
@@ -106,15 +112,15 @@ const MissionUnverifiedDetails = ({
         <div className="w-1/2">
           <Formik
             initialValues={{
-              companyTitle: "",
-              email: "",
-              address: "",
-              country: "",
+              companyTitle: companyTitle,
+              companyEmail: companyEmail,
+              companyAddress: companyAddress,
+              companyCountry: companyCountry,
               missionImage: "",
             }}
             validationSchema={validationSchema}
             onSubmit={(values: FormValues) => {
-              handleCreateProfile({values})
+              handleCreateProfile();
             }}
           >
             {({ values, touched, isValid, setFieldValue, errors }) => (
@@ -122,7 +128,7 @@ const MissionUnverifiedDetails = ({
                 <div className="mx-auto flex h-[769px] w-full flex-col rounded-lg bg-gray p-6 shadow">
                   <div className="flex justify-between">
                     <div className="mb-6 text-left font-primary text-lg font-semibold text-darkgray">
-                      Mission Application Details
+                      Creator Application Details
                     </div>
                     <div className="mb-6 font-primary text-xs font-normal text-darkgray">
                       {formattedDate}
@@ -139,86 +145,54 @@ const MissionUnverifiedDetails = ({
                       <div className="mt-6 font-primary text-sm font-normal text-darkgray">
                         Company Title
                       </div>
-                      <Field
-                        type="text"
+                      <TextField
                         name="companyTitle"
+                        type="text"
+                        label=""
+                        setValue={setCompanyTitle}
+                        value={values.companyTitle}
+                        className="w-full px-3 py-2 mb-3 text-sm rounded-md bg-lightwhite text-darkgray outline outline-1 outline-darkgray focus:outline focus:outline-1 focus:outline-offset-0 focus:outline-primary"
                         placeholder="Coca Cola"
-                        className="mb-1 mt-1 w-full rounded-xl bg-white px-3 py-2 text-sm font-normal text-darkgray focus:outline focus:outline-1 focus:outline-offset-0 focus:outline-primary"
                       />
-                      {touched.companyTitle && errors.companyTitle ? (
-                        <ErrorMessage
-                          name="companyTitle"
-                          component="div"
-                          className="font-primary text-xs font-light text-red"
-                        />
-                      ) : (
-                        <div className="font-primary text-xs font-light text-primary">
-                          Name Confirmed
-                        </div>
-                      )}
-
                       <div className="mt-6 font-primary text-sm font-normal text-darkgray">
                         Email
-                      </div>
-                      <Field
-                        type="email"
-                        name="email"
+                      </div>                      
+                      <TextField
+                        name="companyEmail"
+                        type="text"
+                        label=""
+                        setValue={setCompanyEmail}
+                        value={values.companyEmail}
+                        className="w-full px-3 py-2 mb-3 text-sm rounded-md bg-lightwhite text-darkgray outline outline-1 outline-darkgray focus:outline focus:outline-1 focus:outline-offset-0 focus:outline-primary"
                         placeholder="business@cocacola.com"
-                        className="mb-1 mt-1 w-full rounded-xl bg-white px-3 py-2 text-sm font-normal text-darkgray focus:outline focus:outline-1 focus:outline-offset-0 focus:outline-primary"
                       />
-                      {touched.email && errors.email ? (
-                        <ErrorMessage
-                          name="email"
-                          component="div"
-                          className="font-primary text-xs font-light text-red"
-                        />
-                      ) : (
-                        <div className="font-primary text-xs font-light text-primary">
-                          Email Confirmed
-                        </div>
-                      )}
 
                       <div className="mt-6 font-primary text-sm font-normal text-darkgray">
                         Address
-                      </div>
-                      <Field
+                      </div>                     
+                      <TextField
+                        name="companyAddress"
                         type="text"
-                        name="address"
+                        label=""
+                        setValue={setCompanyAddress}
+                        value={values.companyAddress}
+                        className="w-full px-3 py-2 mb-3 text-sm rounded-md bg-lightwhite text-darkgray outline outline-1 outline-darkgray focus:outline focus:outline-1 focus:outline-offset-0 focus:outline-primary"
                         placeholder="Gistelsteenweg 308, 8490 Jabbeke"
-                        className="mb-1 mt-1 w-full rounded-xl bg-white px-3 py-2 text-sm font-normal text-darkgray focus:outline focus:outline-1 focus:outline-offset-0 focus:outline-primary"
                       />
-                      {touched.address && errors.address ? (
-                        <ErrorMessage
-                          name="address"
-                          component="div"
-                          className="font-primary text-xs font-light text-red"
-                        />
-                      ) : (
-                        <div className="font-primary text-xs font-light text-primary">
-                          Adress Confirmed
-                        </div>
-                      )}
+
                       <div className="mr-2 w-full">
                         <div className="mt-6 font-primary text-sm font-normal text-darkgray">
                           Country
                         </div>
-                        <Field
+                        <TextField
+                          name="companyCountry"
                           type="text"
-                          name="country"
+                          label=""
+                          setValue={setCompanyCountry}
+                          value={values.companyCountry}
+                          className="w-full px-3 py-2 mb-3 text-sm rounded-md bg-lightwhite text-darkgray outline outline-1 outline-darkgray focus:outline focus:outline-1 focus:outline-offset-0 focus:outline-primary"
                           placeholder="The Netherlands"
-                          className="mb-1 mt-1 w-full rounded-xl bg-white px-3 py-2 text-sm font-normal text-darkgray focus:outline focus:outline-1 focus:outline-offset-0 focus:outline-primary"
                         />
-                        {touched.country && errors.country ? (
-                          <ErrorMessage
-                            name="country"
-                            component="div"
-                            className="font-primary text-xs font-light text-red"
-                          />
-                        ) : (
-                          <div className="font-primary text-xs font-light text-primary">
-                            Country Confirmed
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>

@@ -1,11 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Logs from "../Logs/Logs";
 import Missions from "../Missions/Missions";
 import Incidents from "../Incidents/Incidents";
 import Earnings from "../Earnings/Earnings";
 import InnerHeader from "../../components/_Layout/InnerHeader/InnerHeader";
 import ChatSlide from "../ChatSlide/ChatSlide";
-import { useAppSelector } from "src/redux/hooks";
+import { userActions } from "../../redux/user/userSlice";
+import { useAuthContext } from "src/context/AuthProvider";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import LoadingSpinner from "src/components/LoadSpinner/LoadSpinner";
 
 const Collector = () => {
   const [isSlideVisible, setIsSlideVisible] = useState(false);
@@ -16,6 +19,25 @@ const Collector = () => {
   const { selectedUser } = useAppSelector((s) => ({
     selectedUser: s.user.selectedUser,
   }));
+
+  const { accessToken } = useAuthContext();
+  const dispatch = useAppDispatch();
+
+  const { isDataLoading, aggregatedDetailsData } = useAppSelector((s) => ({
+    isDataLoading: s.user.isDataLoading,
+
+    aggregatedDetailsData: s.user.aggregatedDetailsData,
+  }));
+
+  useEffect(() => {
+    const id = "ACyBghHZcR"; 
+    dispatch(userActions.aggregatedDetailsData({ accessToken, id}));
+  },[])
+
+  if (isDataLoading) {
+    return <LoadingSpinner />;
+  }
+
   return (
     <>
       {selectedUser ? (

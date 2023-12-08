@@ -19,8 +19,8 @@ const Header = ({ logout }: props) => {
     dispatch(userActions.setCreateBounty({}));
   };
   return (
-    <div className="fixed mx-auto flex w-full items-center justify-between bg-white p-7">
-      <div className="flex w-1/2 items-center gap-8">
+    <div className="fixed flex items-center justify-between w-full mx-auto bg-white p-7">
+      <div className="flex items-center w-1/2 gap-8">
         <Link
           href="/"
           className="flex items-center justify-center font-primary hover:border-0 "
@@ -56,12 +56,12 @@ const Header = ({ logout }: props) => {
         >
           Creators
         </Link>
-        <Link
+        {/* <Link
           href="/components"
           className="font-primary text-darkgray hover:border-0 hover:text-primary"
         >
           Components
-        </Link>
+        </Link> */}
       </div>
       <div className="flex gap-5 text-darkgray">
         <IoSettingsOutline className="text-xl" onClick={logout} />

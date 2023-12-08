@@ -41,16 +41,14 @@ const Storers = () => {
           {storers?.top_storers?.length}
         </div>
       </div>
-      <div className="grid grid-cols-4 gap-5 mt-5">
-        <VerificationQueue
-          members={storers?.verification_queue_storers?.result}
-        />
+      <div className="grid grid-cols-3 gap-5 mt-5">
+        <VerificationQueue />
         <div className="col-span-2 ">
           {storers.top_storers && (
             <Leaderboard members={storers?.top_storers} />
           )}
         </div>
-        <RecentVerified members={storers?.verified_storers.result} />
+        {/* <RecentVerified members={storers?.verified_storers.result} /> */}
       </div>
     </div>
   );

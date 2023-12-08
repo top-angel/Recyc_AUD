@@ -4,6 +4,7 @@ import IncidentsList from "./IncidentsList/IncidentsList";
 import Button from "../Button/Button";
 import { Formik, Field, ErrorMessage, Form } from "formik";
 import CustomTab from "../CustomTab/CustomTab";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 
 type ListItemsProps = {
   image: string;
@@ -12,7 +13,20 @@ type ListItemsProps = {
   content: string;
 };
 
+type IncidentProps = {
+  _id: string,
+  _rev: string,
+  created_at: string,
+  description: string,
+  user_id: string,
+}
+
 const Incidents = () => {
+  const { aggregatedDetailsData } = useAppSelector((s) => ({
+    aggregatedDetailsData: s.user.aggregatedDetailsData,
+  }));
+  const incidentDetailsData: IncidentProps[] = aggregatedDetailsData?.incidents;
+
   const [ListItems, setListItems] = useState<ListItemsProps[]>([]);
   const [totalCount, setTotalCount] = useState<number>(0);
   const [isState, setIsState] = useState<boolean>(false);

@@ -29,6 +29,12 @@ export interface UserState {
   chatselectedUser: any;
   createProfile: boolean | null;
   unverifiedCreatorData: any;
+  aggregatedDetailsData: any;
+  isNewUsersLoading: boolean;
+  newStorers: any[];
+  newCreators: any[];
+  approveStorer: boolean;
+  profileStatus: boolean;
 }
 
 const initialState: UserState = {
@@ -60,41 +66,19 @@ const initialState: UserState = {
   chatselectedUser: {},
   createProfile: false,
   unverifiedCreatorData: {},
+  aggregatedDetailsData: {},
+  isNewUsersLoading: false,
+  newStorers: [],
+  newCreators: [],
+  approveStorer: false,
+  profileStatus: false,
 };
 
 export const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
-    logout: (state) => {
-      state.isLoggedIn = false;
-      state.members = [];
-      state.user = {};
-      state.isDataLoading = false;
-      state.pendingUsers = [];
-      state.storerDetail = {};
-      state.creatorDetail = {};
-      state.storers = {
-        verified_storers: { result: [] },
-        top_storers: [],
-        verification_queue_storers: { result: [] },
-      };
-      state.creators = {
-        verified_creators: { result: [] },
-        top_creators: [],
-        verification_queue_creators: { result: [] },
-      };
-      state.collectors = {
-        verified_collectors: { result: [] },
-        top_collectors: [],
-        verification_queue_collectors: { result: [] },
-      };
-      state.fetchAllUsers = {};
-      state.selectedUser = {};
-      state.chatselectedUser = {};
-      state.createProfile = false;
-      state.unverifiedCreatorData = {};
-    },
+    logout: () => initialState,
     authenticate: (state, action) => {
       state.isLoggedIn = true;
       state.user = action.payload;
@@ -144,6 +128,21 @@ export const userSlice = createSlice({
     },
     setUnverifiedCreatorData: (state, action: PayloadAction<any>) => {
       state.unverifiedCreatorData = action.payload;
+    },
+    setAggregatedDetailsData: (state, action: PayloadAction<any>) => {
+      state.aggregatedDetailsData = action.payload;
+    },
+    setNewStorers: (state, action: PayloadAction<any>) => {
+      state.newStorers = action.payload;
+    },
+    setNewCreators: (state, action: PayloadAction<any>) => {
+      state.newCreators = action.payload;
+    },
+    setApproveStorer: (state, action: PayloadAction<any>) => {
+      state.approveStorer = action.payload;
+    },
+    setProfileStatus: (state, action: PayloadAction<boolean>) => {
+      state.profileStatus = action.payload;
     },
   },
 });
@@ -195,7 +194,47 @@ export const userActions = {
       country: string;
     };
   }>("user/createProfile"),
-  setUnverifiedCreatorData: createAction<any>("user/setUnverifiedCreatorData"),
+  unverifiedCreatorData: createAction<{
+    accessToken: string;
+    id: string;
+  }>("user/unverifiedCreatorData"),
+  aggregatedDetailsData: createAction<{
+    id: string;
+    accessToken: string;
+  }>("user/aggregatedDetailsData"),
+  getAllNewStorers: createAction<{
+    token: string;
+    pageSize: number;
+  }>("user/getAllNewStorers"),
+  getAllNewCreators: createAction<{
+    token: string;
+    pageSize: number;
+  }>("user/getAllNewCreators"),
+  approveStorerInfo: createAction<{
+    id: string;
+    token: string;
+    storerData: {
+      name: string;
+      address: string;
+      geocode: {
+        lat: number;
+        lng: number;
+      };
+      postalCode: string;
+      city: string;
+      country: string;
+      worktime: string;
+      storageSpace: number;
+    };
+  }>("user/approveStorerInfo"),
+  updateProfileStatus: createAction<{
+    id: string;
+    token: string;
+    profileStatusData: {
+      status: string;
+      status_reason: string;
+    };
+  }>("user/updateProfileStatus"),
 };
 
 export default userSlice.reducer;

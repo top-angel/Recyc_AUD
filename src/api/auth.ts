@@ -86,10 +86,13 @@ export const Login = async (accountId: string, signature: string) => {
   });
 
   const jsonResult = await loginResult.json();
+  console.log(jsonResult);
+  const roles = jsonResult.roles;
   const accessToken = jsonResult.access_token;
   const refreshToken = jsonResult.refresh_token;
 
   const tokens: Tokens = {
+    roles,
     accessToken,
     refreshToken,
   };

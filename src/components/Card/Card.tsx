@@ -12,7 +12,7 @@ const Card = ({ children, fullHeight }: props) => {
     <div
       className={classNames(
         "p-4 border rounded-md bg-gray border-darkestgray ",
-        fullHeight && "min-h-[calc(100vh-145px)]"
+        fullHeight && "h-[calc(100vh-200px)] overflow-auto"
       )}
     >
       {children}

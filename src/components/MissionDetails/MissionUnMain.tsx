@@ -5,7 +5,7 @@ import MissionDeclined from "./MissionDeclined";
 import MissionCreator from "./MissionCreator";
 import MissionCreatorVerified from "./MissionCreatorVerified";
 
-const MissionUnMain = () => {
+const MissionUnMain = ({data}: any) => {
   const initialStatus = localStorage.getItem("approvedStatus");
   const [currentComponent, setCurrentComponent] = useState(
     initialStatus || "main",
@@ -46,6 +46,7 @@ const MissionUnMain = () => {
           <MissionUnverifiedDetails
             onDeclineClick={() => setCurrentComponent("decline")}
             onApproveClick={() => setCurrentComponent("approved")}
+            missionData={data}
           />
         );
       case "decline":

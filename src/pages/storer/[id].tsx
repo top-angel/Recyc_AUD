@@ -17,25 +17,33 @@ const StorerDetailsPage = () => {
 
   const { accessToken } = useAuthContext();
 
-  const { isDataLoading, storerDetail } = useAppSelector((s) => ({
+  const { isDataLoading, newStorers } = useAppSelector((s) => ({
     isDataLoading: s.user.isDataLoading,
-    storerDetail: s.user.storerDetail,
+    newStorers: s.user.newStorers,
   }));
 
-  useEffect(() => {
-    if (id) {
-      dispatch(
-        userActions.storerDetail({
-          url: `https://crab.recyclium.dataunion.app/api/v1/storer/${id}`,
-          token: accessToken,
-        })
-      );
-    }
-  }, [id]);
+  function findObjectById(array, id) {
+    return array.find(item => item._id === id);
+  }
+
+  let targetId = id; 
+  let resultObject = findObjectById(newStorers, targetId);
+  
+  // useEffect(() => {
+  //   if (id) {
+  //     dispatch(
+  //       userActions.storerDetail({
+  //         url: `https://crab.recyclium.dataunion.app/api/v1/storer/${id}`,
+  //         token: accessToken,
+  //       })
+  //     );
+  //   }
+  // }, [id]);
 
   return (
     <Main meta={<Meta title="Recyclium" description="Recyclium front-end" />}>
-      {isDataLoading ? <LoadingSpinner /> : <Storer data={storerDetail} />}
+      {/* {isDataLoading ? <LoadingSpinner /> : <Storer data={storerDetail} />} */}
+      {resultObject && <Storer data={resultObject}/>}
     </Main>
   );
 };
